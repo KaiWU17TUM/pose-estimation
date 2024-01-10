@@ -213,6 +213,8 @@ if __name__=='__main__':
     try:
         while True:
             # for (serial, profile), opWrapper in zip(pipelines, opWrappers):
+            c = 0
+            frame_ts_prev = 0
             for (serial, profile) in pipelines:
                 frame_ts = time.time_ns()
 
@@ -244,10 +246,15 @@ if __name__=='__main__':
                 np.save(os.path.join(depth_path, str(frame_ts)), depth_image)
                 cv.imwrite(os.path.join(color_path, str(frame_ts) + '.png'), color_image)
 
+                if c % 15 == 0:
+                    print(f'{c}\t---\t{int((frame_ts-frame_ts_prev)/1e9)}')
+
                 #save frame_ts
                 with open(os.path.join(save_path, serial, trial_time, 'timestamp', 'timestamps.txt'), 'w+') as timestamp_file:
                     timestamp_file.write(f"{frame_ts}\r")
 
+                frame_ts_prev = frame_ts
+                c += 1
 
 
                 # # Render images
