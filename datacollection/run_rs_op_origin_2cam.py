@@ -17,9 +17,7 @@ def findDevices():
     serials = []
     if (len(ctx.devices) > 0):
         for dev in ctx.devices:
-            printout('Found device: ', \
-                  dev.get_info(rs.camera_info.name), ' ', \
-                  dev.get_info(rs.camera_info.serial_number), 'i')
+            print('Found device: ', dev.get_info(rs.camera_info.name), ' ', dev.get_info(rs.camera_info.serial_number))
             serials.append(dev.get_info(rs.camera_info.serial_number))
     else:
         printout("No Intel Device connected", 'e')
@@ -30,14 +28,14 @@ def findDevices():
 def enableDevices_and_saveCalib(save_path, trial, serials, ctx, resolution_width=640, resolution_height=480, frame_rate=30):
     pipelines = []
     for serial in serials:
-        profile = rs.pipeline(ctx)
+        pipe = rs.pipeline(ctx)
         cfg = rs.config()
         cfg.enable_device(serial)
         # enable color and depth streaming
         cfg.enable_stream(rs.stream.color, resolution_width, resolution_height, rs.format.bgr8, frame_rate)
         cfg.enable_stream(rs.stream.depth, resolution_width, resolution_height, rs.format.z16, frame_rate)
-        profile.start(cfg)
-        pipelines.append([serial, profile])
+        profile = pipe.start(cfg) # Start pipeline and get the configuration it found
+        pipelines.append([serial, pipe])
 
         #save calib data
         profile_rgb = profile.get_stream(rs.stream.color)
