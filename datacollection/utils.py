@@ -208,8 +208,8 @@ def save_heatmaps(rs_args: argparse.Namespace,
                 continue
 
             c += 1
-            if c > rs_args.rs_steps:
-                break
+#            if c > rs_args.rs_steps:
+#                break
 
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()

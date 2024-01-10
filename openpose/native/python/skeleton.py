@@ -430,6 +430,7 @@ class PyOpenPoseNative(PyOpenPoseNativeBase):
         self.datum.cvInputData = image
         self.opWrapper.emplaceAndPop(op.VectorDatum([self.datum]))
         os.makedirs(os.path.dirname(hm_save_path), exist_ok=True)
+        # print(len(self.datum.poseRawHeatMaps))
         self.datum.poseRawHeatMaps[0].tofile(hm_save_path)
         np.insert(self.datum.poseRawHeatMaps[0].reshape(-1),
                   [0, 0, 0, 0, 0],
