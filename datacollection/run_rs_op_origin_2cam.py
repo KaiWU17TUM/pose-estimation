@@ -40,14 +40,14 @@ def enableDevices_and_saveCalib(save_path, trial, serials, ctx, resolution_width
         #save calib data
         profile_rgb = profile.get_stream(rs.stream.color)
         intr_rgb = profile_rgb.as_video_stream_profile().get_intrinsics()
-        intr_rgb_mat = np.array([[intr_rgb.fx, 0, intr_rgb.ppx],
-                                 [0, intr_rgb.fy, intr_rgb.ppy],
-                                 [0, 0, 1]])
+        intr_rgb_mat = [intr_rgb.fx, 0, intr_rgb.ppx,
+                        0, intr_rgb.fy, intr_rgb.ppy,
+                        0, 0, 1]
         profile_depth = profile.get_stream(rs.stream.depth)  # Fetch stream profile for depth stream
         intr_depth = profile_depth.as_video_stream_profile().get_intrinsics()  # Downcast to video_stream_profile and fetch intrinsics
-        intr_depth_mat = np.array([[intr_depth.fx, 0, intr_depth.ppx],
-                                   [0, intr_depth.fy, intr_depth.ppy],
-                                   [0, 0, 1]])
+        intr_depth_mat = [intr_depth.fx, 0, intr_depth.ppx,
+                          0, intr_depth.fy, intr_depth.ppy,
+                          0, 0, 1]
 
         # Extrinsic matrix from RGB sensor to Depth sensor
         extr = profile_rgb.as_video_stream_profile().get_extrinsics_to(profile_depth)
