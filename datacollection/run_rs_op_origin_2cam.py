@@ -245,7 +245,7 @@ if __name__=='__main__':
                 cv.imwrite(os.path.join(color_path, str(frame_ts) + '.png'), color_image)
 
                 #save frame_ts
-                with open(os.path.join(save_path, 'timestamp', 'timestamps.txt'), 'w+') as timestamp_file:
+                with open(os.path.join(save_path, serial, trial_time, 'timestamp', 'timestamps.txt'), 'w+') as timestamp_file:
                     timestamp_file.write(f"{frame_ts}\r")
 
 
