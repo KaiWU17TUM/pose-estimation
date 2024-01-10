@@ -239,9 +239,8 @@ if __name__=='__main__':
                 # output_img = datum.cvOutputData
 
                 # save data
-                save_path = os.path.join(save_path, serial, trial_time)
-                depth_path = os.path.join(save_path, 'depth')
-                color_path = os.path.join(save_path, 'color')
+                depth_path = os.path.join(save_path, serial, trial_time, 'depth')
+                color_path = os.path.join(save_path, serial, trial_time, 'color')
                 np.save(os.path.join(depth_path, str(frame_ts)), depth_image)
                 cv.imwrite(os.path.join(color_path, str(frame_ts) + '.png'), color_image)
 
