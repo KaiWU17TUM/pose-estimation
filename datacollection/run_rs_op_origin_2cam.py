@@ -95,8 +95,9 @@ def enableDevices_and_saveCalib(save_path, trial, serials, ctx, resolution_width
         device_path = os.path.join(save_path, serial, trial)
         calib_path = os.path.join(device_path, 'calib')
         filename = f'dev{serial}_calib.json'
-        save_path = os.path.join(calib_path, filename)
-        with open(save_path, 'w') as outfile:
+        file_path = os.path.join(calib_path, filename)
+
+        with open(file_path, 'w') as outfile:
             json.dump(calib_data, outfile, indent=4)
 
         printout(f'Realsense calibration data saved to {save_path}', 'i')
@@ -211,7 +212,6 @@ if __name__=='__main__':
 
     try:
         while True:
-            timestamp_file = open(save_path + '/timestamp' + '/timestamps.txt', 'w+')
             # for (serial, profile), opWrapper in zip(pipelines, opWrappers):
             for (serial, profile) in pipelines:
                 frame_ts = time.time_ns()
@@ -246,7 +246,8 @@ if __name__=='__main__':
                 cv.imwrite(os.path.join(color_path, str(frame_ts) + '.png'), color_image)
 
                 #save frame_ts
-                timestamp_file.write(f"{frame_ts}\r")
+                with open(os.path.join(save_path, 'timestamp', 'timestamps.txt'), 'w+') as timestamp_file:
+                    timestamp_file.write(f"{frame_ts}\r")
 
 
 
@@ -272,5 +273,4 @@ if __name__=='__main__':
             #     break
     finally:
         pipelineStop(pipelines)
-        timestamp_file.close()
         print('Stop realsense piplines.')
