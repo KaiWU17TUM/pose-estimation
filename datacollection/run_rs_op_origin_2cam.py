@@ -210,11 +210,11 @@ if __name__=='__main__':
     if len(serials) > 2:
         printout('Only accept 2 cameras!', 'e')
 
+    c = 0
+    frame_ts_prev = 0
     try:
         while True:
             # for (serial, profile), opWrapper in zip(pipelines, opWrappers):
-            c = 0
-            frame_ts_prev = 0
             for (serial, profile) in pipelines:
                 frame_ts = time.time_ns()
 
@@ -246,15 +246,15 @@ if __name__=='__main__':
                 np.save(os.path.join(depth_path, str(frame_ts)), depth_image)
                 cv.imwrite(os.path.join(color_path, str(frame_ts) + '.png'), color_image)
 
-                if c % 15 == 0:
-                    print(f'{c}\t---\t{int((frame_ts-frame_ts_prev)/1e9)}')
-
                 #save frame_ts
                 with open(os.path.join(save_path, serial, trial_time, 'timestamp', 'timestamps.txt'), 'w+') as timestamp_file:
                     timestamp_file.write(f"{frame_ts}\r")
 
-                frame_ts_prev = frame_ts
-                c += 1
+            if c % 15 == 0:
+                print(f'FRAME: {c}\t---\t{int((frame_ts - frame_ts_prev) / 1e9)}\t---\t{frame_ts}')
+
+            frame_ts_prev = frame_ts
+            c += 1
 
 
                 # # Render images
