@@ -191,7 +191,7 @@ if __name__=='__main__':
     # set up realsense cameras
     img_width = 848  # pixels
     img_height = 480  # pixels
-    frame_rate = p.fps  # fps
+    frame_rate = args.fps  # fps
 
     serials, ctx = findDevices()
     create_save_folders(save_path, serials, trial_time)
