@@ -25,7 +25,7 @@ def findDevices():
     return serials, ctx
 
 
-def enableDevices_and_saveCalib(save_path, trial, serials, ctx, resolution_width=640, resolution_height=480, frame_rate=30):
+def enableDevices_and_saveCalib(save_path, trial, serials, ctx, resolution_width=848, resolution_height=480, frame_rate=5):
     pipelines = []
     for serial in serials:
         pipe = rs.pipeline(ctx)
@@ -180,6 +180,10 @@ if __name__=='__main__':
                    type=str,
                    default="",
                    help='path to saved camera data')
+    p.add_argument('--fps',
+                   type=int,
+                   default=5,
+                   help='frame per second')
 
     args = p.parse_args()
     save_path = args.save_path
@@ -187,7 +191,7 @@ if __name__=='__main__':
     # set up realsense cameras
     img_width = 848  # pixels
     img_height = 480  # pixels
-    frame_rate = 15  # fps
+    frame_rate = p.fps  # fps
 
     serials, ctx = findDevices()
     create_save_folders(save_path, serials, trial_time)
@@ -207,7 +211,7 @@ if __name__=='__main__':
     #     wrapper.start()
     #     opWrappers.append(wrapper)
 
-    if len(serials) > 2:
+    if len(serials) != 2:
         printout('Only accept 2 cameras!', 'e')
 
     c = 0
@@ -251,7 +255,7 @@ if __name__=='__main__':
                     timestamp_file.write(f"{frame_ts}\r")
 
             if c % 15 == 0:
-                print(f'FRAME: {c}\t---\t{int((frame_ts - frame_ts_prev) / 1e9)}\t---\t{frame_ts}')
+                print(f'FRAME: {c}\t---\t{(frame_ts - frame_ts_prev) / 1e9}\t---\t{frame_ts}')
 
             frame_ts_prev = frame_ts
             c += 1
