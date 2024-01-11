@@ -255,7 +255,7 @@ if __name__=='__main__':
                     timestamp_file.write(f"{frame_ts}\r")
 
             if c % 15 == 0:
-                print(f'FRAME: {c}\t---\t{(frame_ts - frame_ts_prev) / 1e9}\t---\t{frame_ts}')
+                print(f'FRAME: {c}\t---\t{1/((frame_ts - frame_ts_prev) / 1e9)}\t---\t{frame_ts}')
 
             frame_ts_prev = frame_ts
             c += 1
