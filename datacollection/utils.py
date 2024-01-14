@@ -7,9 +7,11 @@ import sys
 import numpy as np
 from queue import Queue
 from threading import Thread
+import json
 
 from rs_py.rs_run_devices import printout
 from rs_py.rs_run_devices import RealsenseWrapper
+from rs_py.utility import read_color_file, read_depth_file, read_calib_file
 
 from openpose.native.python.skeleton import OpenPosePoseExtractor
 
@@ -106,6 +108,10 @@ def extract_pose_from_heatmaps(base_path: str,
 
             path = f"{device}/{trial}/skeleton_fromheatmap"
             path = os.path.join(base_path, path)
+            # tmp #
+            if os.path.exists(path):
+                break
+            # tmp #
             os.makedirs(path, exist_ok=True)
 
             path = f"{device}/{trial}/heatmap"
@@ -118,7 +124,8 @@ def extract_pose_from_heatmaps(base_path: str,
             depth_files = [os.path.join(path, i)
                            for i in sorted(os.listdir(path))]
 
-            for hm_file, depth_file in zip(hm_files, depth_files):
+            N_files = len(depth_files)
+            for N_i, (hm_file, depth_file) in enumerate(zip(hm_files, depth_files)):
                 hm = np.fromfile(hm_file, np.float32)
                 hm = [hm[5:].reshape(int(hm[1]), int(
                     hm[2]), int(hm[3]), int(hm[4]))]
@@ -130,8 +137,19 @@ def extract_pose_from_heatmaps(base_path: str,
                         "/heatmap", "/skeleton_fromheatmap"
                     ).replace(".float", ".txt")
                 )
+                check = PE.pyop.datum.customInputNetData
+
+                checksum_hm = sum(hm[0].flatten())
+                checksum_datum_input = sum(PE.pyop.datum.customInputNetData[0].flatten())
+                try:
+                    checksum_kp = sum(PE.pyop.pose_keypoints.flatten())
+                except:
+                    checksum_kp = -1
+                print(f'{N_i}-{N_files}-{int(N_i/N_files*100)}%\t', checksum_kp, checksum_hm, checksum_datum_input)
 
                 if display_pose:
+                    pose_kpts = PE.pyop.pose_keypoints
+                    pose_score = PE.pyop.pose_scores
                     _, image = PE.display()
                     depth_colormap = cv2.applyColorMap(
                         cv2.convertScaleAbs(np.load(depth_file), alpha=0.03),
@@ -246,5 +264,63 @@ def save_heatmaps(rs_args: argparse.Namespace,
 
     for i in range(3):
         PE.CQ[i].put((None, None, True))
+
+    printout(f"Finished...", 'i')
+
+def extract_pose_from_rgb(base_path: str,
+                          op_args: argparse.Namespace,
+                          save_skeleton_plot=True):
+    PE = OpenPosePoseExtractor(op_args)
+    PE.pyop.configure(PE.pyop.params)
+
+    devices = os.listdir(base_path)
+    trials = os.listdir(os.path.join(base_path, devices[0]))
+
+    for device in devices:
+        for trial in trials:
+            path = f"{device}/{trial}/skeleton_fromrgb"
+            path = os.path.join(base_path, path)
+            os.makedirs(path, exist_ok=True)
+
+            # path = f"{device}/{trial}/color"
+            path = f"{device}/{trial}/color"
+            path = os.path.join(base_path, path)
+            rgb_files = [os.path.join(path, i)
+                        for i in sorted(os.listdir(path))]
+
+            path = f"{device}/{trial}/depth"
+            path = os.path.join(base_path, path)
+            depth_files = [os.path.join(path, i)
+                           for i in sorted(os.listdir(path))]
+
+            path = f"{device}/{trial}/calib"
+            path = os.path.join(base_path, path, f"dev{device}_calib.json")
+            with open(path, 'r') as f:
+                calib_data = json.load(f)
+
+            # h_c = calib_data['color']['height']
+            # w_c = calib_data['color']['width']
+            h_d = calib_data['depth'][0]['height']
+            w_d = calib_data['depth'][0]['width']
+
+            for rgb_file, depth_file in zip(rgb_files, depth_files):
+                # image = read_color_file(rgb_file)
+                # image = image.reshape(h_c, w_c, 3)
+                # recorded image is upside-down
+                # image = np.rot90(image, 2)
+                image = cv2.imread(rgb_file)
+                image = cv2.rotate(image, cv2.ROTATE_180)
+
+                depth = read_depth_file(depth_file)
+                depth = depth[-h_d * w_d:].reshape(h_d, w_d)
+                depth = np.rot90(depth, 2)
+
+                PE.predict(
+                    image=image,
+                    depth=depth,
+                    kpt_save_path=rgb_file.replace(
+                        "/color_png", "/skeleton_fromrgb"
+                    ).replace(".png", ".txt")
+                )
 
     printout(f"Finished...", 'i')

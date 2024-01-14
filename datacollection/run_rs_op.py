@@ -1,7 +1,9 @@
 import argparse
+import os
 
 from datacollection.utils import extract_pose_from_heatmaps
 from datacollection.utils import save_heatmaps
+from datacollection.utils import extract_pose_from_rgb
 
 from openpose.native.python.utils import str2bool
 
@@ -63,15 +65,36 @@ if __name__ == "__main__":
                    type=str2bool,
                    default=False,
                    help='')
+    p.add_argument('--extract-pose-from-hm',
+                   type=str2bool,
+                   default=False,
+                   help='Extract pose from heatmaps')
+    p.add_argument('--extract-pose-from-rgb',
+                   type=str2bool,
+                   default=False,
+                   help='Extract pose from RGB images')
     args, _ = p.parse_known_args()
 
     rs_args = get_rs_args()
     op_args = get_op_args()
 
-    if len(args.extract_pose) != 0:
-        extract_pose_from_heatmaps(args.extract_pose, op_args,
-                                   args.display_pose)
+    op_args.save_heatmaps = args.save_heatmaps
+    op_args.extract_pose_from_hm = args.extract_pose_from_hm
+
+    if args.extract_pose_from_hm:
+        # extract_pose_from_heatmaps(args.extract_pose, op_args,
+        #                            args.display_pose)
+
+        folders = os.listdir('/mnt/DHM-ICUSUITE-DS2/icu_recording/')
+        folders = [f for f in folders if '-15fps' in f]
+        for folder in folders:
+            args.extract_pose = os.path.join('/mnt/DHM-ICUSUITE-DS2/icu_recording/', folder)
+            extract_pose_from_heatmaps(args.extract_pose, op_args,
+                                       args.display_pose)
     elif args.save_heatmaps:
         save_heatmaps(rs_args, op_args)
+
+    elif args.extract_pose_from_rgb:
+        extract_pose_from_rgb(args.extract_pose, op_args, save_skeleton_plot=True)
     else:
         raise ValueError("No arg given...")

@@ -199,6 +199,8 @@ class PyOpenPoseNativeBase:
             np.savetxt(save_path, data, delimiter=',')
 
     def save_pose_keypoints(self, save_path: str) -> None:
+        pose_kpts = self.pose_keypoints
+        pose_score =self.pose_scores
         self.save_2d_skeleton(keypoints=self.pose_keypoints,
                               scores=self.pose_scores,
                               save_path=save_path)
@@ -402,24 +404,35 @@ class PyOpenPoseNative(PyOpenPoseNativeBase):
         self.params = params.copy()
 
         # Get heatmap from certain layer in caffe model
-        params["scale_number"] = 1
-        params["body"] = 1
-        params["posenet_only"] = True
-        # saves heatmaps in unscaled size. Not used if posenet_only=True
-        # params["upsampling_ratio"] = 1
-        params["custom_net_input_layer"] = ""
-        params["custom_net_output_layer"] = "pool3_stage1"
+        if params['predict_hm']:
+            params["scale_number"] = 1
+            params["body"] = 1
+            params["posenet_only"] = True
+            # saves heatmaps in unscaled size. Not used if posenet_only=True
+            # params["upsampling_ratio"] = 1
+            params["custom_net_input_layer"] = ""
+            params["custom_net_output_layer"] = "pool3_stage1"
         self.params_cout = params.copy()
 
-        # Get keypoints from heatmaps
-        params["scale_number"] = 1
-        params["body"] = 1  # 2 to Disable OP Network
-        params["posenet_only"] = False
-        # saves heatmaps in unscaled size. Not used if posenet_only=True
-        # params["upsampling_ratio"] = 0  # 0 rescales to input image size
-        params["custom_net_input_layer"] = "pool3_stage1"
-        params["custom_net_output_layer"] = ""
+        if params['predict_from_hm']:
+            # Get keypoints from heatmaps
+            params["scale_number"] = 1
+            params["body"] = 1  # 2 to Disable OP Network
+            params["posenet_only"] = False
+            # saves heatmaps in unscaled size. Not used if posenet_only=True
+            # params["upsampling_ratio"] = 0  # 0 rescales to input image size
+            params["custom_net_input_layer"] = "pool3_stage1"
+            params["custom_net_output_layer"] = ""
+
         self.params_cin = params.copy()
+
+        self.params.pop('predict_hm');
+        self.params.pop('predict_from_hm');
+        self.params_cin.pop('predict_hm');
+        self.params_cin.pop('predict_from_hm');
+        self.params_cout.pop('predict_hm');
+        self.params_cout.pop('predict_from_hm');
+
 
         self.opWrapper = op.WrapperPython()
         self.opWrapper.configure(self.params)
@@ -474,7 +487,7 @@ class PyOpenPoseNative(PyOpenPoseNativeBase):
         self.datum.customInputNetData = heatmap
         # self.configure(self.params_cin)
         self.opWrapper.emplaceAndPop(op.VectorDatum([self.datum]))
-        self.datum.customInputNetData = []
+        # self.datum.customInputNetData = []
 
         if self.datum.poseScores is None:
             self._pose_empty = True
@@ -530,6 +543,8 @@ class OpenPosePoseExtractor:
                 heatmaps_add_PAFs=args.op_heatmaps_add_PAFs,
                 heatmaps_scale=args.op_heatmaps_scale,
                 render_pose=-1 if args.op_display > 0 else 0,
+                predict_from_hm=1 if args.extract_pose_from_hm is True else 0,
+                predict_hm=1 if args.save_heatmaps is True else 0,
             ),
             args.op_skel_thres,
             args.op_max_true_body,
@@ -551,6 +566,7 @@ class OpenPosePoseExtractor:
     def predict_hm(self,
                    image: np.ndarray,
                    hm_save_path: str) -> None:
+        image = cv2.rotate(image, cv2.ROTATE_180)
         self.pyop.predict_hm(image, hm_save_path)
 
     def predict_from_hm(self,
@@ -559,6 +575,9 @@ class OpenPosePoseExtractor:
                         kpt_save_path: Optional[str] = None) -> None:
         self.pyop.predict_from_hm(image, heatmap)
         self.pyop.filter_prediction()
+
+        pose_kpts = self.pyop.pose_keypoints
+        pose_score = self.pyop.pose_scores
         if kpt_save_path is not None:
             self.pyop.save_pose_keypoints(kpt_save_path)
 

@@ -71,7 +71,7 @@ class AppExt(App):
         pass
 
     def read_offline_data(self, data_path, trial_idx):
-        color_dict, depth_dict, trial_list = \
+        color_dict, depth_dict, _, trial_list = \
             get_filepaths_with_timestamps(data_path)
         trial_id = trial_list[trial_idx]
         device_sn = list(color_dict[trial_id].keys())[0]
