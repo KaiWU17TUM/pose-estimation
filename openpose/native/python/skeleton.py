@@ -526,6 +526,7 @@ class OpenPosePoseExtractor:
     def predict_hm(self,
                    image: np.ndarray,
                    hm_save_path: str) -> None:
+        image = cv2.rotate(image, cv2.ROTATE_180)
         self.pyop.predict_hm(image, hm_save_path)
 
     def predict_from_hm(self,
