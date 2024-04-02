@@ -319,7 +319,7 @@ def extract_pose_from_rgb(base_path: str,
                     image=image,
                     depth=depth,
                     kpt_save_path=rgb_file.replace(
-                        "/color_png", "/skeleton_fromrgb"
+                        "/color", "/skeleton_fromrgb"
                     ).replace(".png", ".txt")
                 )
 
