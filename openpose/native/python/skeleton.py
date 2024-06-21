@@ -396,7 +396,7 @@ class PyOpenPoseNative(PyOpenPoseNativeBase):
 
         params["scale_number"] = 1
         params["body"] = 1
-        params["face"] = True
+        params["face"] = 0
 
 
         # params["posenet_only"] = False
