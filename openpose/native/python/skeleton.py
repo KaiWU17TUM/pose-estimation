@@ -396,6 +396,9 @@ class PyOpenPoseNative(PyOpenPoseNativeBase):
 
         params["scale_number"] = 1
         params["body"] = 1
+        params["face"] = True
+
+
         # params["posenet_only"] = False
         # params["custom_net_input_layer"] = ""
         # params["custom_net_output_layer"] = ""
