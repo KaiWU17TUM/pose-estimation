@@ -94,7 +94,10 @@ class PoseHeatMapExtractionMultithreading:
 
 def extract_pose_from_heatmaps(base_path: str,
                                op_args: argparse.Namespace,
-                               display_pose: bool = False):
+                               display_pose: bool = False,
+                               face: bool = True
+                               ):
+    op_args.face = face
     PE = OpenPosePoseExtractor(op_args)
     PE.pyop.configure(PE.pyop.params_cin)
 

@@ -377,7 +377,8 @@ class PyOpenPoseNative(PyOpenPoseNativeBase):
                  params: Optional[dict] = None,
                  skel_thres: float = 0.0,
                  max_true_body: int = 2,
-                 patch_offset: int = 2) -> None:
+                 patch_offset: int = 2,
+                 ) -> None:
         super().__init__(skel_thres, max_true_body, patch_offset)
 
         # default parameters
@@ -396,7 +397,6 @@ class PyOpenPoseNative(PyOpenPoseNativeBase):
 
         params["scale_number"] = 1
         params["body"] = 1
-        params["face"] = 0
 
 
         # params["posenet_only"] = False
@@ -522,7 +522,7 @@ class OpenPosePoseExtractor:
     has functions that intialize openpose, infer + save pose, and display pose.
     """
 
-    def __init__(self, args: argparse.Namespace) -> None:
+    def __init__(self, args: argparse.Namespace, face: bool) -> None:
         self.pyop = PyOpenPoseNative(
             dict(
                 model_folder=args.op_model_folder,
@@ -533,6 +533,7 @@ class OpenPosePoseExtractor:
                 heatmaps_add_PAFs=args.op_heatmaps_add_PAFs,
                 heatmaps_scale=args.op_heatmaps_scale,
                 render_pose=-1 if args.op_display > 0 else 0,
+                face=face
             ),
             args.op_skel_thres,
             args.op_max_true_body,

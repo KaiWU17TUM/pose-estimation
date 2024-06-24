@@ -63,6 +63,11 @@ if __name__ == "__main__":
                    type=str2bool,
                    default=False,
                    help='')
+    p.add_argument('--face',
+                   type=str2bool,
+                   default=True,
+                   help='enable face detection')
+
     args, _ = p.parse_known_args()
 
     rs_args = get_rs_args()
@@ -70,7 +75,7 @@ if __name__ == "__main__":
 
     if len(args.extract_pose) != 0:
         extract_pose_from_heatmaps(args.extract_pose, op_args,
-                                   args.display_pose)
+                                   args.display_pose, args.face)
     elif args.save_heatmaps:
         save_heatmaps(rs_args, op_args)
     else:
