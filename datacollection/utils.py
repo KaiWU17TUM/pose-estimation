@@ -298,17 +298,19 @@ def extract_pose_from_rgb(base_path: str,
             with open(path, 'r') as f:
                 calib_data = json.load(f)
 
-            # h_c = calib_data['color']['height']
-            # w_c = calib_data['color']['width']
-            h_d = calib_data['depth'][0]['height']
-            w_d = calib_data['depth'][0]['width']
+            h_d = calib_data['depth']['height']
+            w_d = calib_data['depth']['width']
+            #h_d = calib_data['depth'][0]['height']
+            #w_d = calib_data['depth'][0]['width']
 
             for rgb_file, depth_file in zip(rgb_files, depth_files):
                 # image = read_color_file(rgb_file)
                 # image = image.reshape(h_c, w_c, 3)
                 # recorded image is upside-down
                 # image = np.rot90(image, 2)
-                image = cv2.imread(rgb_file)
+
+                cv2.imwrite("temp.png", rgb_file)
+                image = cv2.imread("temp.png")
                 image = cv2.rotate(image, cv2.ROTATE_180)
 
                 depth = read_depth_file(depth_file)
